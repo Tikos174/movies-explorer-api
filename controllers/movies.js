@@ -22,7 +22,7 @@ const createMovie = (req, res, next) => {
       } next(err);
     });
 };
-пше
+
 const deleteMovieById = (req, res, next) => {
   Movie.findById({ _id: req.params.movieId })
     .then((movie) => {
