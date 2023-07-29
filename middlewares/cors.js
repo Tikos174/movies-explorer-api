@@ -1,6 +1,5 @@
 const allowedCors = [
   'http://localhost:3000',
-  
 ];
 
 const cors = (req, res, next) => {

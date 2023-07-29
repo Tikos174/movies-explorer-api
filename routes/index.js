@@ -32,7 +32,7 @@ router.post('/signout', signout);
 router.use('/users', auth, require('./users'));
 router.use('/movies', auth, require('./movies'));
 
-router.use(auth, (req, res, next) => {
+router.use('*', (req, res, next) => {
   next(new NotFound('Запрашиваемый ресурс не найден'));
 });
 
