@@ -36,7 +36,7 @@ const login = (req, res, next) => {
 };
 
 const signout = (req, res) => {
-  res.clearCookie('jwt');
+  res.clearCookie('authorization');
   res.status(200).json('Пользователь вышел из системы');
 };
 
