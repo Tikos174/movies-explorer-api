@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const helmet = require('helmet');
 
 const { errors } = require('celebrate');
 const cors = require('../middlewares/cors');
@@ -11,7 +10,6 @@ const auth = require('../middlewares/auth');
 const errorHandler = require('../middlewares/errorHandler');
 const NotFound = require('../utils/notFoundErr');
 
-router.use(helmet());
 router.use(cors);
 
 router.use(requestLogger);
