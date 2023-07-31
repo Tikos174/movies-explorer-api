@@ -30,7 +30,7 @@ const login = (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
-      res.status(200).cookie('authorization', token).send({ email });
+      res.status(200).cookie('authorization', token).send({ token });
     })
     .catch(next);
 };

@@ -18,10 +18,12 @@ router.post('/signin', signinValid, login);
 
 router.post('/signup', signupValid, createUser);
 
-router.post('/signout', auth, signout);
+router.use(auth);
 
-router.use('/users', auth, require('./users'));
-router.use('/movies', auth, require('./movies'));
+router.post('/signout', signout);
+
+router.use('/users', require('./users'));
+router.use('/movies', require('./movies'));
 
 router.all('/', (req, res, next) => {
   next(new NotFound('Запрашиваемый ресурс не найден'));
