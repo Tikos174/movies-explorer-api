@@ -5,19 +5,22 @@ require('dotenv').config();
 const NotFound = require('../utils/notFoundErr');
 const IncorrectRequest = require('../utils/incorrectRequest');
 const ConflictEmail = require('../utils/conflictEmail');
+const NotАuthorized = require('../utils/notAuthorized');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getUser = (req, res, next) => {
-  const { _id } = req.user;
-  User.findById(_id)
+  User.findById({ _id: req.user._id })
     .then((user) => {
       if (!user) {
         throw new NotFound('Нет пользователя с таким id');
+      } else {
+        res.status(200).send(user);
       }
-      res.status(200).send({ user });
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const login = (req, res, next) => {
@@ -25,14 +28,24 @@ const login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-        { expiresIn: '7d' },
-      );
-      res.status(200).cookie('authorization', token).send({ token });
+      if (!user) {
+        throw new NotАuthorized('Неправильная почта или пароль.');
+      }
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          throw new NotАuthorized('Неправильная почта или пароль.');
+        }
+        const token = jwt.sign(
+          { _id: user._id },
+          NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+          { expiresIn: '7d' },
+        );
+        res.status(200).send({ token });
+      });
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const signout = (req, res) => {
@@ -41,18 +54,15 @@ const signout = (req, res) => {
 };
 
 const createUser = (req, res, next) => {
-  const {
-    name, email, password,
-  } = req.body;
+  const { email, name } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name,
-      email,
-      password: hash,
-    }))
-    .then((user) => {
-      res.status(200).send({ data: user });
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({ email, password: hash, name }))
+    .then((newUser) => {
+      res.status(200).send({
+        email: newUser.email,
+        name: newUser.name,
+      });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {

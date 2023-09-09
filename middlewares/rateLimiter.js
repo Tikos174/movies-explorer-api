@@ -1,10 +1,8 @@
-const rateLimiters = require('express-rate-limit');
+const rateLimit = require('express-rate-limit');
 
-const rateLimiter = rateLimiters({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // за 15 минут
+  max: 100, // можно совершить максимум 100 запросов с одного IP
 });
 
-module.exports = { rateLimiter };
+module.exports = limiter;

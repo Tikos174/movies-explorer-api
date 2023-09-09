@@ -6,20 +6,51 @@ const ForbiddenError = require('../utils/forbiddenErr');
 const getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
     .then((movies) => res.status(201).send(movies))
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const createMovie = (req, res, next) => {
+  const { _id } = req.user;
+
+  const {
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailerLink,
+    nameRU,
+    nameEN,
+    thumbnail,
+    movieId,
+  } = req.body;
+
   Movie.create({
-    ...req.body,
-    owner: req.user._id,
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailerLink,
+    nameRU,
+    nameEN,
+    thumbnail,
+    movieId,
+    owner: _id,
   })
     .then((movie) => res.status(201).send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new IncorrectRequest('Введены неверные данные при создании фильма'));
+        next(
+          new IncorrectRequest('Введены неверные данные при создании фильма'),
+        );
         return;
-      } next(err);
+      }
+      next(err);
     });
 };
 
@@ -31,14 +62,16 @@ const deleteMovieById = (req, res, next) => {
       } else if (!(req.user._id === movie.owner._id.toString())) {
         throw new ForbiddenError('Запрещено удалять чужие фильмы');
       } else {
-        Movie.deleteOne()
+        Movie.deleteOne({ _id: req.params.movieId })
           .then((myMovie) => {
             res.status(200).send({ myMovie });
           })
           .catch(next);
       }
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports = { getMovies, createMovie, deleteMovieById };
